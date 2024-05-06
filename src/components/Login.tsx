@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const style = {
     outerScreen: 'mx-auto bg-gradient-to-r from-purple-500 to-indigo-600 h-screen flex flex-cols justify-center items-center',
@@ -9,27 +9,63 @@ const style = {
     button: 'w-full bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600',
 };
 
-const Login = () => {
-    const [email, setEmail] = useState('');
+const Login: React.FC<{ setToken: (token: string) => void }> = ({ setToken }) => {
+    const navigate = useNavigate();
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [redirect, setRedirect] = useState(false);
 
-    const handleLogin = (e) => {
+    const submit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        const userData = JSON.parse(localStorage.getItem('userData'));
-
-        if (userData && userData.email === email && userData.password === password) {
-            <Link to="/todo" />
+        if (username.length === 0) {
+            alert("Username cannot be blank!");
+        } else if (password.length === 0) {
+            alert("Password cannot be blank!");
         } else {
-            setError('Invalid email or password');
+            // Send data to backend
+            const userData = {
+                Username: username,
+                Password: password
+            };
+
+            fetch('http://127.0.0.1:8000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            })
+                .then(resp => resp.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.token) {
+                        const token = data.encoded_jwt;
+                        localStorage.setItem('token', token);
+                        setToken(token);
+                        navigate('/todo');
+                    } else {
+                        alert(data.message); // Show any error message from backend
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending data to backend:', error);
+                });
         }
     };
 
+    useEffect(() => {
+        // Fetch initial data from backend
+        fetch('http://127.0.0.1:8000/login')
+            .then(resp => resp.json())
+            .then(data => {
+                console.log(data); // Handle the data received from the backend
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }, []);
+
     return (
         <div className="w-full mt-8">
-            
             <div className={style.outerScreen}>
                 <div className={style.box}>
                     <div className={style.formContainer}>
@@ -38,12 +74,11 @@ const Login = () => {
                             <p className='mb-7 text-xs text-indigo-700'>Your perfect task manager! </p>
                             <h2 className="text-lg font-semibold mb-4 text-purple-400">Login</h2>
                         </div>
-                        <form onSubmit={handleLogin}>
-                            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={style.input} required />
+                        <form onSubmit={submit}>
+                            <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} className={style.input} required />
                             <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className={style.input} required />
                             <button type="submit" className={style.button}>Login</button>
                         </form>
-                        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                         <hr className="my-4" />
                         <p className='text-xs text-gray-500 '>Create an account or <Link to="/signup">Signup</Link></p>
                     </div>
@@ -54,4 +89,3 @@ const Login = () => {
 };
 
 export default Login;
-

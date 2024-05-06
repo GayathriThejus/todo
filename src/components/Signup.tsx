@@ -6,7 +6,7 @@ const style = {
     box: 'w-[387px] h-[457px] shadow-xl bg-white rounded-md mx-auto',
     formContainer: 'p-8',
     input: 'w-full mb-4 p-2 rounded-md border border-gray-300 focus:outline-none focus:border-indigo-500',
-    button: 'w-full bg-indigo-500 text-white py-2 px-4 rounded-md hover:bg-indigo-600',
+    button: 'w-full bg-purple-300 text-white py-2 px-4 rounded-md hover:bg-indigo-600',
 };
 
 const Signup = () => {
