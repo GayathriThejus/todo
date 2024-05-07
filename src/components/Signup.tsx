@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 
 const style = {
-    outerScreen: 'mx-auto bg-gradient-to-r from-purple-500 to-indigo-600 h-screen flex flex-cols justify-center items-center',
+    outerScreen: 'mx-auto bg-gradient-to-r from-purple-500 to-rose-600 h-screen flex flex-cols justify-center items-center',
     box: 'w-[387px] h-[457px] shadow-xl bg-white rounded-md mx-auto',
     formContainer: 'p-8',
     input: 'w-full mb-4 p-2 rounded-md border border-gray-300 focus:outline-none focus:border-indigo-500',
@@ -10,17 +10,59 @@ const style = {
 };
 
 const Signup = () => {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [redirect, setRedirect] = useState(false);
 
-    const handleSignup = (e: React.FormEvent) => {
-        e.preventDefault();
-        localStorage.setItem('userData', JSON.stringify({ name, email, password }));
-        setRedirect(true);
+    const [userInfo, setUserInfo] = useState({
+        username: "",
+        password: "",
+    });
+    
+    const handleInputChange = (e) => {
+        setUserInfo({
+            ...userInfo,
+            [e.target.name]: e.target.value
+        });
     };
+    const postData = async (e) => {
+            e.preventDefault();
+            console.log(userInfo)
+        
+            const url = 'http://127.0.0.1:8000/signup' 
 
+    
+            const response = await fetch(
+                url, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    credentials: 'same-origin', 
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    redirect: 'follow',
+                    referrerPolicy: 'no-referrer', 
+                    body: JSON.stringify({
+                        "username": userInfo['username'],
+                        "password": userInfo['password'],
+                        
+                    }) 
+                });
+                const responseData = await response.json();
+                console.log(responseData); 
+            response.json().then(responseData => {
+                if (responseData.status === 'ok') {
+                    alert("User signed in successfully")
+                } else {
+                    console.log(response.status);
+                    alert("Failed to add user")
+                }
+            });
+            setUserInfo({
+               username:"",
+               password:""
+            })
+        }
+
+ 
     return (
         <div className="w-full mt-8"> 
        
@@ -32,10 +74,10 @@ const Signup = () => {
                             <p className='mb-7 text-xs text-indigo-700'>Your perfect task manager! </p>
                             <h2 className="text-lg font-semibold mb-4 text-purple-400">Signup</h2>
                         </div>
-                        <form onSubmit={handleSignup}>
-                            <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className={style.input} required />
-                            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className={style.input} required />
-                            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className={style.input} required />
+                        <form onSubmit={postData}>
+                        <input type="text" name="username" placeholder="UserName" value={userInfo.username} onChange={handleInputChange} className={style.input} required />
+                        <input type="password" name="password" placeholder="Password" value={userInfo.password} onChange={handleInputChange} className={style.input} required />
+
                             <button type="submit" className={style.button}>Signup</button>
                         </form>
                         <hr className="my-4" />

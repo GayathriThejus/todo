@@ -23,10 +23,9 @@ const Login: React.FC<{ setToken: (token: string) => void }> = ({ setToken }) =>
         } else {
             // Send data to backend
             const userData = {
-                Username: username,
-                Password: password
+                username: username,
+                password: password
             };
-
             fetch('http://127.0.0.1:8000/login', {
                 method: 'POST',
                 headers: {
@@ -38,12 +37,10 @@ const Login: React.FC<{ setToken: (token: string) => void }> = ({ setToken }) =>
                 .then(data => {
                     console.log(data);
                     if (data.token) {
-                        const token = data.encoded_jwt;
-                        localStorage.setItem('token', token);
-                        setToken(token);
+                        alert("User logged in successfully"); // Show successful login alert
                         navigate('/todo');
                     } else {
-                        alert(data.message); // Show any error message from backend
+                        alert("Login failed"); // Show login failed alert
                     }
                 })
                 .catch(error => {
@@ -51,19 +48,6 @@ const Login: React.FC<{ setToken: (token: string) => void }> = ({ setToken }) =>
                 });
         }
     };
-
-    useEffect(() => {
-        // Fetch initial data from backend
-        fetch('http://127.0.0.1:8000/login')
-            .then(resp => resp.json())
-            .then(data => {
-                console.log(data); // Handle the data received from the backend
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
-    }, []);
-
     return (
         <div className="w-full mt-8">
             <div className={style.outerScreen}>
